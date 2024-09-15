@@ -1,4 +1,4 @@
-version: "3.8"
+version: "3.9"
 services:
   nginx:
     build:
@@ -7,13 +7,12 @@ services:
     image: nginx
     container_name: nginx
     volumes:
-      - /home/oakerkao/data/wordpress-data:/var/www/html
-    #environment:
+        - wordpress-data:/var/www/html
     networks:
       - connect
     ports:
       - 443:443
-        #restart: unless-stopped
+    restart: always
   wordpress:
     build:
       context: ./requirements/wordpress
@@ -21,17 +20,14 @@ services:
     image: wordpress
     container_name: wordpress
     volumes:
-      - /home/oakerkao/data/wordpress-data:/var/www/html
-    environment:
-      WORDPRESS_DB_NAME: wordpress_db 
-      WORDPRESS_DB_USER: oussama 
-      WORDPRESS_DB_PASSWORD: password
-      WORDPRESS_DB_HOST: mariadb
+        - wordpress-data:/var/www/html
+    env_file:
+      - .env
     networks:
       - connect
     ports:
       - 9000:9000
-        #    restart: unless-stopped
+    restart: always
   mariadb:
     build:
       context: ./requirements/mariadb
@@ -39,29 +35,28 @@ services:
     image: mariadb
     container_name: mariadb
     volumes:
-      - /home/oakerkao/data/mariadb-data:/var/lib/mysql
-    environment:
-      MYSQL_DATABASE: wordpress_db 
-      MYSQL_USER: oussama 
-      MYSQL_PASSWORD: password 
-      MYSQL_ROOT_PASSWORD: password 
+      - mariadb-data:/var/lib/mysql
+    env_file:
+      - .env
     networks:
       - connect
     ports:
       - 3306:3306
-        #restart: unless-stopped
-
+    restart: always
 networks:
   connect:
     name: fullstack-network
     driver: bridge
-
-
-
-      #volumes:
-        #mariadb-data:
-          #type: "bind"
-          #o: none
-          #device: /home/oakerkao/data/mariadb-data
-
-    #wordpress-data:
+volumes:
+      mariadb-data:
+        name: mariadb-data
+        driver_opts:
+          type: none
+          o: bind
+          device: /home/oakerkao/data/mariadb-data/
+      wordpress-data:
+        name: wordpress-data
+        driver_opts:
+          type: none
+          o: bind
+          device: /home/oakerkao/data/mariadb-data/

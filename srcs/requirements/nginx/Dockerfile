@@ -4,9 +4,7 @@ RUN apt update -y && \
 	apt upgrade -y && \
 	apt install nginx -y && \
 	apt install openssl && \
-	openssl genrsa -out /etc/nginx/conf.d/website.key 2048 && \
-	openssl req -new -key /etc/nginx/conf.d/website.key -x509 -days 365 -out /etc/nginx/conf.d/website.crt \
-		-subj "/C=US/ST=California/L=San Francisco/O=My Organization/CN=mydomain.com"
+	openssl req -x509 -nodes -days 365 -newkey rsa:4096 -keyout  /etc/nginx/conf.d/website.key -subj "/C=US/ST=California/L=San Francisco/O=My Organization/CN=mydomain.com" -out /etc/nginx/conf.d/website.crt
 
 COPY ./conf/nginx.conf /etc/nginx/conf.d
 

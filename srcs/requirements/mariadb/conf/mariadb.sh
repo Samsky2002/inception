@@ -1,14 +1,20 @@
 #!/bin/bash
-cat  <<EOF > /tmp/init.sql
+
+if [ ! -d "/var/lib/mysql/mysql" ]; then
+    echo "Initializing MariaDB data directory..."
+    mysql_install_db --user=root --datadir=/var/lib/mysql
+fi
+
+if [ ! -f /tmp/init.sql ]; then
+	cat  <<EOF > /tmp/init.sql
 FLUSH PRIVILEGES;
 CREATE DATABASE IF NOT EXISTS ${MYSQL_DATABASE};
 CREATE USER IF NOT EXISTS '${MYSQL_USER}'@'%' IDENTIFIED BY '${MYSQL_PASSWORD}';
-GRANT ALL PRIVILEGES ON ${MYSQL_DATABASE}.* TO '${MYSQL_USER}'@'%';
+GRANT ALL PRIVILEGES ON ${MYSQL_DATABASE}.* TO '${MYSQL_USER}'@'%' IDENTIFIED BY '${MYSQL_PASSWORD}';
 FLUSH PRIVILEGES;
 EOF
+fi
 
-#ALTER USER 'root'@'%' IDENTIFIED BY 'password';
-#GRANT ALL PRIVILEGES ON * . * TO 'root'@'%';
-mysqld --user=root --bootstrap < /tmp/init.sql
+mariadbd --user=root --bootstrap < /tmp/init.sql
 
-exec mysqld --user=root --bind-address=0.0.0.0
+exec mariadbd --user=root --bind-address=0.0.0.0
